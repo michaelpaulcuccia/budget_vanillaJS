@@ -187,6 +187,33 @@ var UIController = (function () {
         expensesPercentageLabel: '.item__percentage'
     };
 
+    var formatNumber = function (num, type) {
+        var numSplit, int, dec;
+
+       //  + or - before number ... 2 decimal points ... comma separating thousands
+
+       
+       num = Math.abs(num); //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/abs
+       num = num.toFixed(2); //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toFixed
+
+       //STRING not Number 
+       
+       numSplit = num.split('.'); //stored in an array
+
+       int = numSplit[0];
+
+       //lengths over 1000
+       //substr() https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substr
+       if (int.length > 3) {
+           int = int.substr(0, int.length - 3) + ',' + int.substr(int.length -3, 3); 
+       }
+
+       dec = numSplit[1];
+       
+       return (type === 'exp' ? '-' : '+') + " "  + int + '.' + dec;
+
+    };
+
     return {
         getInput: function () {
             return {
@@ -215,7 +242,7 @@ var UIController = (function () {
 
             newHTML = html.replace('%id%', obj.id);
             newHTML = newHTML.replace('%description%', obj.description);
-            newHTML = newHTML.replace('%value%', obj.value);
+            newHTML = newHTML.replace('%value%', formatNumber(obj.value, type));
 
             //insert HTML into the DOM
             //https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML
@@ -253,12 +280,15 @@ var UIController = (function () {
             },
 
          displayBudget: function(obj) {
-           
-            //the object from getBudget()
+           //the object from getBudget()
 
-            document.querySelector(DOMstrings.budgetLabel).textContent = obj.budget;
-            document.querySelector(DOMstrings.incomeLabel).textContent = obj.totalInc;
-            document.querySelector(DOMstrings.expenseLabel).textContent = obj.totalExp;
+           var type;
+
+            obj.budget > 0 ? type = 'inc' : type = 'exp'; 
+
+            document.querySelector(DOMstrings.budgetLabel).textContent = formatNumber(obj.budget, type);
+            document.querySelector(DOMstrings.incomeLabel).textContent = formatNumber(obj.totalInc, 'inc');
+            document.querySelector(DOMstrings.expenseLabel).textContent = formatNumber(obj.totalExp, 'exp');
             
             //percentage control 
             if (obj.percentage > 0){
@@ -429,5 +459,4 @@ var controller = (function (budgetCtrl, UICtrl) {
 })(budgetController, UIController);
 
 controller.init();
-
 
